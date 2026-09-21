@@ -1,0 +1,8 @@
+{
+  "name": "To'y Makoni - O'zbekiston To'y Xizmatlari Portali",
+  "description": "O'zbekistonda to'yxonalar, ZAGS mashinalari, xonandalar, boshlovchilar va to'y xizmatlarini qulay qidirish, bandlikni tekshirish va bron qilish platformasi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
