@@ -20,6 +20,31 @@ export const formatUzbekDate = (dateStr: string): string => {
   }
 };
 
+export const formatUzbekPhoneNumber = (input: string): string => {
+  const digits = input.replace(/\D/g, '');
+  let nationalNumber = digits;
+  if (digits.startsWith('998')) {
+    nationalNumber = digits.slice(3);
+  }
+  nationalNumber = nationalNumber.slice(0, 9);
+  
+  if (nationalNumber.length === 0) return '+998 ';
+  if (nationalNumber.length <= 2) return `+998 ${nationalNumber}`;
+  if (nationalNumber.length <= 5) return `+998 ${nationalNumber.slice(0, 2)} ${nationalNumber.slice(2)}`;
+  if (nationalNumber.length <= 7) return `+998 ${nationalNumber.slice(0, 2)} ${nationalNumber.slice(2, 5)} ${nationalNumber.slice(5)}`;
+  return `+998 ${nationalNumber.slice(0, 2)} ${nationalNumber.slice(2, 5)} ${nationalNumber.slice(5, 7)} ${nationalNumber.slice(7, 9)}`;
+};
+
+export const isValidUzbekPhone = (phone: string): boolean => {
+  const digits = phone.replace(/\D/g, '');
+  return digits.length === 12 && digits.startsWith('998');
+};
+
+export const sanitizeInput = (text: string): string => {
+  if (!text) return '';
+  return text.trim().replace(/[<>]/g, '');
+};
+
 export const getCategoryMeta = (category: CategoryType) => {
   switch (category) {
     case 'wedding-hall':
@@ -69,6 +94,14 @@ export const getCategoryMeta = (category: CategoryType) => {
         description: 'To\'y davrasiga samimiy kulgi va ko\'tarinki kayfiyat baxsh etuvchilar',
         color: 'indigo',
         path: '/entertainers'
+      };
+    case 'videographer':
+      return {
+        label: 'Videochilar & Media',
+        singular: 'Videochi',
+        description: 'To\'y tantanalari uchun professional 4K video, multikam va dron tasvirga olish xizmatlari',
+        color: 'rose',
+        path: '/videochilar'
       };
     default:
       return {
