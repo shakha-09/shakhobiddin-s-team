@@ -15,7 +15,9 @@ import {
   ExternalLink, 
   Menu, 
   X,
-  ShieldAlert
+  ShieldAlert,
+  UserCheck,
+  Video
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 
@@ -30,19 +32,27 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onNavigate,
   children
 }) => {
-  const { logoutAdmin, bookings, reviews } = useStore();
+  const { logoutAdmin, bookings, reviews, vendors } = useStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const pendingBookingsCount = bookings.filter(b => b.status === 'new').length;
+  const pendingVendorsCount = vendors.filter(v => v.status === 'kutilmoqda').length;
 
   const menuItems = [
     { label: 'Boshqaruv Paneli', path: '/admin/dashboard', icon: LayoutDashboard },
+    { 
+      label: 'Yangi Vendorlar', 
+      path: '/admin/vendors', 
+      icon: UserCheck,
+      badge: pendingVendorsCount > 0 ? pendingVendorsCount : undefined 
+    },
     { label: 'To\'yxonalar', path: '/admin/wedding-halls', icon: Building2 },
     { label: 'ZAGS Mashinalari', path: '/admin/cars', icon: Car },
     { label: 'Xonandalar', path: '/admin/artists', icon: Music },
     { label: 'Mashhur Yulduzlar', path: '/admin/famous-artists', icon: Sparkles },
     { label: 'Boshlovchilar', path: '/admin/hosts', icon: Mic },
     { label: 'Qiziqchilar', path: '/admin/entertainers', icon: Smile },
+    { label: 'Videochilar', path: '/admin/videographers', icon: Video },
     { 
       label: 'So\'rovlar & Bronlar', 
       path: '/admin/bookings', 

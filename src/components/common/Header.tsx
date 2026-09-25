@@ -12,7 +12,11 @@ import {
   Car,
   Music,
   Mic,
-  Smile
+  Smile,
+  UserCheck,
+  UserPlus,
+  Store,
+  Video
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 
@@ -22,7 +26,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
-  const { favorites, isAdminLoggedIn } = useStore();
+  const { favorites, isAdminLoggedIn, activeVendor } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -32,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
     { name: 'Yulduzlar', path: '/famous-artists', icon: Sparkles, badge: 'VIP' },
     { name: 'Boshlovchilar', path: '/hosts', icon: Mic },
     { name: 'Qiziqchilar', path: '/entertainers', icon: Smile },
+    { name: 'Videochilar', path: '/videochilar', icon: Video },
     { name: 'Budjet hisoblagich', path: '/budget-calculator', icon: Calculator },
   ];
 
@@ -48,8 +53,12 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
           onClick={() => handleLinkClick('/')}
           className="flex items-center gap-2.5 text-left group focus:outline-hidden cursor-pointer"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#D4AF37] via-[#E5C158] to-[#C5A059] text-gray-950 shadow-md shadow-amber-500/20 transition-transform group-hover:scale-105">
-            <Sparkles className="w-5 h-5" />
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-amber-300/60 shadow-md shadow-amber-500/20 transition-transform group-hover:scale-105">
+            <img 
+              src="/images/wedding_rings_logo.jpg" 
+              alt="To'y Makoni Logo" 
+              className="h-full w-full object-cover"
+            />
           </div>
           <div>
             <span className="font-serif-luxury font-bold text-2xl tracking-tight text-white group-hover:text-amber-200 transition-colors">
@@ -62,14 +71,14 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
         </button>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+        <nav className="hidden xl:flex items-center gap-1">
           {navLinks.map((link) => {
             const isActive = currentPath === link.path || currentPath.startsWith(link.path + '/');
             return (
               <button
                 key={link.path}
                 onClick={() => handleLinkClick(link.path)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-serif-luxury text-sm font-semibold tracking-wide transition-all relative cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-serif-luxury text-xs font-semibold tracking-wide transition-all relative cursor-pointer ${
                   isActive
                     ? 'bg-white/25 text-white border border-white/35 backdrop-blur-sm shadow-xs'
                     : 'text-white/85 hover:bg-white/15 hover:text-white'
@@ -77,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
               >
                 <span>{link.name}</span>
                 {link.badge && (
-                  <span className="rounded-full bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] px-2 py-0.2 text-[9px] font-bold text-gray-950 uppercase shadow-xs">
+                  <span className="rounded-full bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] px-1.5 py-0.2 text-[8.5px] font-bold text-gray-950 uppercase shadow-xs">
                     {link.badge}
                   </span>
                 )}
@@ -87,11 +96,41 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
         </nav>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
+          {/* Become a Vendor Button (Visible to everyone - Part 1 Requirement 1) */}
+          <button
+            onClick={() => handleLinkClick('/vendor-register')}
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#E5C158] hover:from-[#c29f30] hover:to-[#d4b14e] text-gray-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Store className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">Xizmat ko'rsatuvchi bo'lish</span>
+            <span className="sm:hidden">Vendor bo'lish</span>
+          </button>
+
+          {/* Vendor Dashboard or Login */}
+          {activeVendor ? (
+            <button
+              onClick={() => handleLinkClick('/kabinet')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-300/40 bg-white/15 text-amber-200 hover:bg-white/25 text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
+              title="Vendor Kabineti"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Kabinet</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => handleLinkClick('/vendor-login')}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/20 bg-white/10 text-white/90 hover:bg-white/20 hover:text-white text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+              title="Vendor Kirish"
+            >
+              <span>Kirish</span>
+            </button>
+          )}
+
           {/* Search Button */}
           <button
             onClick={() => handleLinkClick('/search')}
-            className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all cursor-pointer ${
+            className={`flex h-8.5 w-8.5 items-center justify-center rounded-full border transition-all cursor-pointer ${
               currentPath === '/search'
                 ? 'border-amber-300/60 bg-white/25 text-amber-200 shadow-xs'
                 : 'border-white/20 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/40'
@@ -104,7 +143,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
           {/* Favorites Button */}
           <button
             onClick={() => handleLinkClick('/favorites')}
-            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/40 transition-all cursor-pointer"
+            className="relative flex h-8.5 w-8.5 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/40 transition-all cursor-pointer"
             title="Saralanganlar"
           >
             <Heart className="w-4 h-4" />
@@ -115,23 +154,10 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
             )}
           </button>
 
-          {/* My Wedding Plan Button */}
-          <button
-            onClick={() => handleLinkClick('/my-wedding')}
-            className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-serif-luxury font-bold tracking-wide transition-all cursor-pointer ${
-              currentPath === '/my-wedding'
-                ? 'border-amber-300/50 bg-gradient-to-r from-[#D4AF37] to-[#E5C158] text-gray-950 shadow-md shadow-amber-500/20'
-                : 'border-white/20 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/40'
-            }`}
-          >
-            <Calendar className="w-3.5 h-3.5 text-amber-200" />
-            <span>Mening to'yim</span>
-          </button>
-
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex lg:hidden h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 cursor-pointer"
+            className="flex xl:hidden h-8.5 w-8.5 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 cursor-pointer"
           >
             {mobileMenuOpen ? <X className="w-5 h-5 text-amber-200" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -140,20 +166,37 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-white/15 bg-black/90 backdrop-blur-xl px-4 pt-3 pb-5 space-y-1 shadow-2xl text-white">
+        <div className="xl:hidden border-t border-white/15 bg-black/90 backdrop-blur-xl px-4 pt-3 pb-5 space-y-2 shadow-2xl text-white">
           <div className="grid grid-cols-2 gap-2 pb-3 mb-2 border-b border-white/15">
             <button
-              onClick={() => handleLinkClick('/my-wedding')}
-              className="flex items-center justify-center gap-2 p-2.5 rounded-full bg-white/15 text-amber-200 border border-white/20 text-xs font-serif-luxury font-bold"
+              onClick={() => handleLinkClick('/vendor-register')}
+              className="flex items-center justify-center gap-1.5 p-2.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#E5C158] text-gray-950 text-xs font-bold"
             >
-              <Calendar className="w-4 h-4" />
+              <Store className="w-4 h-4" />
+              <span>Vendor bo'lish</span>
+            </button>
+            <button
+              onClick={() => handleLinkClick(activeVendor ? '/kabinet' : '/vendor-login')}
+              className="flex items-center justify-center gap-1.5 p-2.5 rounded-full bg-white/15 text-white border border-white/20 text-xs font-bold"
+            >
+              <UserCheck className="w-4 h-4 text-amber-300" />
+              <span>{activeVendor ? 'Kabinet' : 'Vendor Kirish'}</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pb-2 mb-1 border-b border-white/10">
+            <button
+              onClick={() => handleLinkClick('/my-wedding')}
+              className="flex items-center justify-center gap-2 p-2 rounded-xl bg-white/10 text-amber-200 border border-white/20 text-xs font-semibold"
+            >
+              <Calendar className="w-3.5 h-3.5" />
               <span>Mening to'yim</span>
             </button>
             <button
               onClick={() => handleLinkClick('/favorites')}
-              className="flex items-center justify-center gap-2 p-2.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-serif-luxury font-bold"
+              className="flex items-center justify-center gap-2 p-2 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-semibold"
             >
-              <Heart className="w-4 h-4 text-rose-300" />
+              <Heart className="w-3.5 h-3.5 text-rose-300" />
               <span>Saralanganlar ({favorites.length})</span>
             </button>
           </div>
@@ -170,12 +213,12 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate }) => {
                     isActive ? 'bg-gradient-to-r from-[#D4AF37] to-[#E5C158] text-gray-950 font-bold' : 'text-white/90 hover:bg-white/10'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4" />
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4 text-amber-300" />
                     <span>{link.name}</span>
                   </div>
                   {link.badge && (
-                    <span className="rounded-full bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] px-2 py-0.5 text-[10px] font-bold text-gray-950">
+                    <span className="rounded-full bg-amber-400/20 text-amber-300 text-[10px] px-2 py-0.5 font-bold">
                       {link.badge}
                     </span>
                   )}

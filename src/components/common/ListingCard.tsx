@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Star, MapPin, Users, Car, Music, Mic, Check, Sparkles, Phone, ArrowUpRight } from 'lucide-react';
+import { Heart, Star, MapPin, Users, Car, Music, Mic, Check, Sparkles, Phone, ArrowUpRight, Video } from 'lucide-react';
 import { ListingItem } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { formatUZS, getCategoryMeta } from '../../utils/formatters';
@@ -27,7 +27,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     listing.category === 'artist' ? 'artists' : 
     listing.category === 'famous-artist' ? 'famous-artists' : 
     listing.category === 'host' ? 'hosts' : 
-    listing.category === 'entertainer' ? 'entertainers' : 'listings'}/${listing.id}`;
+    listing.category === 'entertainer' ? 'entertainers' : 
+    listing.category === 'videographer' ? 'videochilar' : 'detail'}/${listing.id}`;
 
   const handleCardClick = () => {
     if (onNavigate) {
@@ -176,6 +177,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               <div className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-gray-500" />
                 <span className="truncate">{listing.artistDetails.genre}</span>
+              </div>
+            )}
+
+            {listing.category === 'videographer' && (
+              <div className="flex items-center gap-1.5">
+                <Video className="w-3.5 h-3.5 text-gray-500" />
+                <span className="truncate">4K Cinema • Multikam • Dron</span>
               </div>
             )}
           </div>

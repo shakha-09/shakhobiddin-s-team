@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { X, Calendar, User, Phone, Users, MessageSquare, CheckCircle, Sparkles } from 'lucide-react';
+import { X, Calendar, User, Phone, Users, MessageSquare, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
 import { ListingItem } from '../../types';
 import { useStore } from '../../context/StoreContext';
-import { formatUZS } from '../../utils/formatters';
+import { formatUZS, formatUzbekPhoneNumber, isValidUzbekPhone, sanitizeInput } from '../../utils/formatters';
 
 interface BookingModalProps {
   listing: ListingItem;
@@ -24,38 +24,61 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [requestedDate, setRequestedDate] = useState(prefilledDate || '2026-09-28');
   const [guestCount, setGuestCount] = useState(listing.capacity ? listing.capacity.min : 300);
   const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
+  const handlePhoneChange = (val: string) => {
+    setCustomerPhone(formatUzbekPhoneNumber(val));
+    if (error) setError('');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName.trim()) {
-      setError('Iltimos, ismingizni kiriting');
-      return;
-    }
-    if (customerPhone.trim().length < 9) {
-      setError('Iltimos, to\'g\'ri telefon raqamingizni kiriting');
+    if (isSubmitting) return;
+
+    const trimmedName = sanitizeInput(customerName);
+    if (!trimmedName || trimmedName.length < 2) {
+      setError('Iltimos, to\'liq ism-familiyangizni kiriting');
       return;
     }
 
-    addBookingRequest({
-      listingId: listing.id,
-      listingTitle: listing.title,
-      category: listing.category,
-      customerName: customerName.trim(),
-      customerPhone: customerPhone.trim(),
-      requestedDate,
-      guestCount: listing.category === 'wedding-hall' ? Number(guestCount) : undefined,
-      message: message.trim()
-    });
+    const cleanDigits = customerPhone.replace(/\D/g, '');
+    if (cleanDigits.length < 12) {
+      setError('Iltimos, to\'liq telefon raqamingizni kiriting (+998 XX XXX XX XX)');
+      return;
+    }
 
-    setIsSubmitted(true);
+    if (!requestedDate) {
+      setError('Iltimos, to\'y sanasini tanlang');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+
+    setTimeout(() => {
+      addBookingRequest({
+        listingId: listing.id,
+        listingTitle: listing.title,
+        category: listing.category,
+        customerName: trimmedName,
+        customerPhone: customerPhone.trim(),
+        requestedDate,
+        guestCount: listing.category === 'wedding-hall' ? Number(guestCount) : undefined,
+        message: sanitizeInput(message)
+      });
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+    }, 400);
   };
 
   const handleResetAndClose = () => {
     setIsSubmitted(false);
+    setIsSubmitting(false);
     setError('');
     onClose();
   };
@@ -191,7 +214,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     required
                     placeholder="+998 90 123 45 67"
                     value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
                     className="w-full rounded-xl border border-gray-300 py-2 pl-9 pr-3 text-sm text-gray-900 focus:border-rose-500 focus:outline-hidden focus:ring-1 focus:ring-rose-500"
                   />
                 </div>
@@ -220,16 +243,25 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={handleResetAndClose}
-                  className="w-1/3 rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="w-1/3 rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="w-2/3 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 transition-colors shadow-sm"
+                  disabled={isSubmitting}
+                  className="w-2/3 flex items-center justify-center gap-2 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50 transition-colors shadow-sm cursor-pointer"
                 >
-                  So'rov yuborish
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Yuborilmoqda...</span>
+                    </>
+                  ) : (
+                    <span>So'rov yuborish</span>
+                  )}
                 </button>
               </div>
             </form>

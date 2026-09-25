@@ -20,14 +20,16 @@ import {
   MessageSquare,
   ArrowLeft,
   ChevronRight,
-  Plus
+  Plus,
+  AlertCircle,
+  XCircle
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { formatUZS, getCategoryMeta } from '../utils/formatters';
 import { AvailabilityCalendar } from '../components/common/AvailabilityCalendar';
 import { AvailabilityBadge } from '../components/common/AvailabilityBadge';
 import { BookingModal } from '../components/common/BookingModal';
-import { LeafletMap } from '../components/common/LeafletMap';
+import { LuxuryLocationBanner } from '../components/common/LuxuryLocationBanner';
 import { getCoordinatesForLocation } from '../data/locations';
 
 interface ListingDetailPageProps {
@@ -101,22 +103,35 @@ export const ListingDetailPage: React.FC<ListingDetailPageProps> = ({ id, onNavi
     }
   };
 
+  const [reviewError, setReviewError] = useState('');
+
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reviewerName.trim() || !reviewerComment.trim()) return;
+    const cleanName = reviewerName.trim();
+    const cleanComment = reviewerComment.trim();
+
+    if (cleanName.length < 2) {
+      setReviewError("Iltimos, ismingizni to'liq kiriting (kamida 2 ta harf).");
+      return;
+    }
+    if (cleanComment.length < 5) {
+      setReviewError("Iltimos, fikringizni batafsilroq yozing (kamida 5 ta belgi).");
+      return;
+    }
 
     addReview({
       listingId: listing.id,
-      userName: reviewerName.trim(),
-      userCity: reviewerCity.trim(),
+      userName: cleanName,
+      userCity: reviewerCity.trim() || 'Toshkent',
       rating: reviewerRating,
-      comment: reviewerComment.trim()
+      comment: cleanComment
     });
 
     setReviewerName('');
     setReviewerComment('');
+    setReviewError('');
     setReviewSubmitted(true);
-    setTimeout(() => setReviewSubmitted(false), 4000);
+    setTimeout(() => setReviewSubmitted(false), 5000);
   };
 
   return (
@@ -317,7 +332,7 @@ export const ListingDetailPage: React.FC<ListingDetailPageProps> = ({ id, onNavi
                 <div>
                   <h2 className="text-lg font-bold text-gray-900">Bandlik taqvimi (Kalendar)</h2>
                   <p className="text-xs text-gray-500">
-                    O'zingizga qulay sanani tanlang va ushbu kunga xizmat bo'shligini tekshiring
+                    O'zingizga qulay sanani tanlang va ushbu kunga xizmat bo'shligini tekshiring. Qizil rangli sanalar — band qilingan.
                   </p>
                 </div>
                 {selectedCalendarDate && (
@@ -334,60 +349,71 @@ export const ListingDetailPage: React.FC<ListingDetailPageProps> = ({ id, onNavi
                 onSelectDate={(d) => setSelectedCalendarDate(d)}
               />
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-xs text-gray-500">
-                  Tanlangan sana: <strong className="text-gray-900">{selectedCalendarDate}</strong>
+              {/* Status Alert Banner for Selected Date */}
+              {selectedCalendarDate && (
+                <div>
+                  {listing.availability[selectedCalendarDate] === 'booked' ? (
+                    <div className="rounded-xl bg-red-50 border border-red-200 p-3.5 flex items-start gap-3 text-xs text-red-950">
+                      <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-red-700 font-extrabold uppercase tracking-wide">DIQQAT — SANA BAND QILINGAN:</strong>{' '}
+                        <span>
+                          <strong>{selectedCalendarDate}</strong> sanasi ushbu xizmat uchun to'liq <strong>BAND</strong>. Boshqa bo'sh (yashil) sanani tanlashingiz yoki navbat kutish so'rovini qoldirishingiz mumkin.
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center gap-2.5 text-xs text-emerald-950">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <strong className="text-emerald-800">{selectedCalendarDate}</strong> sanasi <strong>BO'SH</strong>. Ushbu kunga to'y xizmatini bron qilishingiz mumkin!
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <div className="text-xs text-gray-600">
+                  Tanlangan sana:{' '}
+                  <strong className={listing.availability[selectedCalendarDate] === 'booked' ? 'text-red-600 font-extrabold' : 'text-gray-900 font-bold'}>
+                    {selectedCalendarDate}
+                  </strong>{' '}
+                  ({listing.availability[selectedCalendarDate] === 'booked' ? 'BAND' : "Bo'sh"})
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsBookingModalOpen(true)}
-                  className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-700 transition-colors"
+                  className={`rounded-xl px-5 py-2.5 text-xs font-bold text-white transition-all cursor-pointer shadow-xs ${
+                    listing.availability[selectedCalendarDate] === 'booked'
+                      ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20'
+                      : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'
+                  }`}
                 >
-                  Ushbu sanaga so'rov yuborish
+                  {listing.availability[selectedCalendarDate] === 'booked'
+                    ? "Band sanaga so'rov qoldirish"
+                    : "Ushbu sanaga buyurtma berish"}
                 </button>
               </div>
             </div>
 
-            {/* Address & Interactive OpenStreetMap */}
-            <div className="rounded-2xl bg-white p-6 sm:p-8 border border-gray-200 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Manzil va joylashuv</h2>
-                  <p className="text-xs sm:text-sm text-gray-700 mt-0.5">
-                    {listing.location.address || `${listing.location.district}, ${listing.location.region}`}
-                  </p>
-                </div>
-                <div className="text-[11px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 self-start sm:self-auto">
-                  {listing.location.region} • {listing.location.district}
-                </div>
-              </div>
+            {/* Luxury Location Banner (100% reliable, zero API dependencies, direct Yandex & Google Maps navigation) */}
+            {(() => {
+              const targetCoords = listing.location?.coordinates && listing.location.coordinates.lat && listing.location.coordinates.lng
+                ? listing.location.coordinates
+                : getCoordinatesForLocation(listing.location?.region, listing.location?.district);
 
-              {/* Real Interactive Leaflet OpenStreetMap */}
-              {(() => {
-                const targetCoords = listing.location?.coordinates && listing.location.coordinates.lat && listing.location.coordinates.lng
-                  ? listing.location.coordinates
-                  : getCoordinatesForLocation(listing.location?.region, listing.location?.district);
-
-                return (
-                  <LeafletMap
-                    center={targetCoords}
-                    zoom={15}
-                    height="380px"
-                    markers={[
-                      {
-                        id: listing.id,
-                        title: listing.title,
-                        lat: targetCoords.lat,
-                        lng: targetCoords.lng,
-                        address: listing.location.address || `${listing.location.district}, ${listing.location.region}`,
-                        coverImage: listing.coverImage,
-                        priceLabel: listing.priceLabel
-                      }
-                    ]}
-                  />
-                );
-              })()}
-            </div>
+              return (
+                <LuxuryLocationBanner
+                  title={listing.title}
+                  address={listing.location.address}
+                  region={listing.location.region}
+                  district={listing.location.district}
+                  coordinates={targetCoords}
+                  coverImage={listing.coverImage}
+                />
+              );
+            })()}
 
             {/* Reviews Section */}
             <div className="rounded-2xl bg-white p-6 sm:p-8 border border-gray-200 shadow-xs space-y-6">
@@ -403,31 +429,39 @@ export const ListingDetailPage: React.FC<ListingDetailPageProps> = ({ id, onNavi
               </div>
 
               {/* Reviews list */}
-              <div className="space-y-4">
-                {listingReviews.map((rev) => (
-                  <div key={rev.id} className="rounded-xl bg-gray-50 p-4 border border-gray-100 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
-                          {rev.userName.charAt(0)}
+              {listingReviews.length > 0 ? (
+                <div className="space-y-4">
+                  {listingReviews.map((rev) => (
+                    <div key={rev.id} className="rounded-xl bg-gray-50 p-4 border border-gray-100 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
+                            {rev.userName.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-gray-900">{rev.userName}</div>
+                            <div className="text-[10px] text-gray-500">{rev.userCity || 'Toshkent'} • {rev.date}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-xs font-bold text-gray-900">{rev.userName}</div>
-                          <div className="text-[10px] text-gray-500">{rev.userCity || 'Toshkent'} • {rev.date}</div>
+                        <div className="flex text-amber-400">
+                          {Array.from({ length: rev.rating }).map((_, i) => (
+                            <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                          ))}
                         </div>
                       </div>
-                      <div className="flex text-amber-400">
-                        {Array.from({ length: rev.rating }).map((_, i) => (
-                          <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                        ))}
-                      </div>
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                        "{rev.comment}"
+                      </p>
                     </div>
-                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                      "{rev.comment}"
-                    </p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl bg-gray-50 p-6 text-center border border-gray-100 text-xs text-gray-500">
+                  <MessageSquare className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                  <p className="font-semibold text-gray-700">Hozircha sharhlar qoldirilmagan</p>
+                  <p className="mt-1 text-gray-500">Ushbu xizmat haqida birinchi bo'lib o'z fikringiz va taassurotlaringizni qoldiring!</p>
+                </div>
+              )}
 
               {/* Add review form */}
               <div className="pt-4 border-t border-gray-100">
@@ -435,6 +469,11 @@ export const ListingDetailPage: React.FC<ListingDetailPageProps> = ({ id, onNavi
                 {reviewSubmitted && (
                   <div className="mb-3 rounded-lg bg-emerald-50 p-2.5 text-xs font-medium text-emerald-700">
                     Fikringiz uchun rahmat! Sharhingiz tasdiqlandi va e'lon qilindi.
+                  </div>
+                )}
+                {reviewError && (
+                  <div className="mb-3 rounded-lg bg-rose-50 p-2.5 text-xs font-medium text-rose-700">
+                    {reviewError}
                   </div>
                 )}
                 <form onSubmit={handleReviewSubmit} className="space-y-3">

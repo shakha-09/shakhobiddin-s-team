@@ -294,6 +294,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
             <option value="car">ZAGS Mashinalari</option>
             <option value="artist">Xonandalar</option>
             <option value="famous-artist">Mashhur Yulduzlar</option>
+            <option value="videographer">Videochilar</option>
             <option value="host">Boshlovchilar</option>
             <option value="entertainer">Qiziqchilar</option>
           </select>
@@ -467,6 +468,7 @@ export const AdminListings: React.FC<AdminListingsProps> = ({
                     <option value="car">ZAGS Mashinasi</option>
                     <option value="artist">Xonanda</option>
                     <option value="famous-artist">Mashhur Yulduz (VIP)</option>
+                    <option value="videographer">Videochi</option>
                     <option value="host">Boshlovchi</option>
                     <option value="entertainer">Qiziqchi</option>
                   </select>

@@ -5,6 +5,7 @@ export type CategoryType =
   | 'entertainer'
   | 'host'
   | 'famous-artist'
+  | 'videographer'
   | 'photographer'
   | 'decorator'
   | 'catering';
@@ -92,6 +93,7 @@ export interface ListingItem {
   createdAt: string;
   updatedAt: string;
   viewsCount?: number;
+  vendorId?: string;
 }
 
 export interface BookingRequest {
@@ -144,3 +146,22 @@ export interface AdminUser {
   email: string;
   role: 'super_admin' | 'admin';
 }
+
+export type VendorStatus = 'kutilmoqda' | 'tasdiqlangan' | 'rad etilgan';
+
+export interface VendorAccount {
+  id: string;
+  phone: string;
+  passwordHash: string;
+  businessName: string;
+  category: CategoryType;
+  region: string;
+  district: string;
+  description: string;
+  status: VendorStatus;
+  rejectionReason?: string;
+  listingId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

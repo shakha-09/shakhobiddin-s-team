@@ -13,8 +13,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Col 1: Brand & Mission */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gray-950 text-amber-300 shadow-md">
-                <Sparkles className="w-5 h-5" />
+              <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-amber-400 shadow-md">
+                <img 
+                  src="/images/wedding_rings_logo.jpg" 
+                  alt="To'y Makoni Logo" 
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div>
                 <span className="font-bold text-2xl tracking-tight text-gray-950">
@@ -92,6 +96,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   Qiziqchilar va Shou Dasturlar
                 </button>
               </li>
+              <li>
+                <button 
+                  onClick={() => onNavigate('/videochilar')}
+                  className="hover:text-amber-700 transition-colors text-left cursor-pointer text-gray-700 font-medium"
+                >
+                  Videochilar va Media
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -159,9 +171,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <li className="pt-2">
                 <button
                   onClick={() => onNavigate('/admin')}
-                  className="text-xs text-gray-500 hover:text-gray-900 underline font-medium cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-rose-600 hover:underline transition-colors font-medium cursor-pointer"
+                  title="Platforma ma'murlari uchun kirish"
                 >
-                  Platforma Administrator Paneli
+                  <ShieldCheck className="w-3.5 h-3.5 text-gray-400" />
+                  <span>Admin tizimiga kirish</span>
                 </button>
               </li>
             </ul>

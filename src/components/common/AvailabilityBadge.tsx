@@ -22,9 +22,9 @@ export const AvailabilityBadge: React.FC<AvailabilityBadgeProps> = ({
         };
       case 'booked':
         return {
-          bg: 'bg-rose-50 text-rose-700 border-rose-200',
-          dot: 'bg-rose-500',
-          label: date ? `${date}: Band qilingan` : 'Band (To\'la)'
+          bg: 'bg-red-600 text-white border-red-700 font-bold shadow-xs',
+          dot: 'bg-white',
+          label: date ? `${date}: BAND QILINGAN` : 'BAND (To\'la)'
         };
       case 'pending':
         return {

@@ -16,7 +16,8 @@ import {
   Smile, 
   Star,
   Calculator,
-  ChevronRight
+  ChevronRight,
+  Video
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { UZBEKISTAN_REGIONS, getDistrictsByRegion } from '../data/locations';
@@ -78,6 +79,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     .filter(l => l.category === 'host' && l.status === 'published')
     .slice(0, 2);
 
+  const popularVideographers = listings
+    .filter(l => l.category === 'videographer' && l.status === 'published')
+    .slice(0, 3);
+
   const categoryCards: { type: CategoryType; title: string; count: number; image: string; desc: string; path: string }[] = [
     {
       type: 'wedding-hall',
@@ -110,6 +115,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80',
       desc: 'O\'zbekistonning eng taniqli yulduzlari (VIP)',
       path: '/famous-artists'
+    },
+    {
+      type: 'videographer',
+      title: 'Videochilar va Media',
+      count: listings.filter(l => l.category === 'videographer').length,
+      image: 'https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=800&q=80',
+      desc: '4K LoveStory, dron va multikam tasvirga olish',
+      path: '/videochilar'
     },
     {
       type: 'host',
@@ -188,6 +201,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 <option value="car">Mashinalar korteji</option>
                 <option value="artist">Xonandalar</option>
                 <option value="famous-artist">Mashhur Yulduzlar (VIP)</option>
+                <option value="videographer">Videochilar va Media</option>
                 <option value="host">Boshlovchilar</option>
                 <option value="entertainer">Qiziqchilar va Shou</option>
               </select>
@@ -482,6 +496,44 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7.5. VIDEOGRAPHERS SHOWCASE */}
+      <section className="py-14 bg-white border-b border-gray-200">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-700">
+                <Video className="w-4 h-4" />
+                <span>4K Video & Media</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-950 tracking-normal mt-1">
+                Professional Videochilar va Studiyalar
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                To'yingizning har bir baxtli daqiqasini eng ilg'or kinostandartlar darajasida muhrlaydigan operatorlar
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigate('/videochilar')}
+              className="flex items-center gap-1 text-sm font-semibold text-gray-900 hover:text-amber-700 transition-colors cursor-pointer tracking-normal"
+            >
+              <span>Barchasini ko'rish</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {popularVideographers.map((vid) => (
+              <ListingCard
+                key={vid.id}
+                listing={vid}
+                onNavigate={onNavigate}
+                selectedDate={weddingDate}
+              />
+            ))}
           </div>
         </div>
       </section>

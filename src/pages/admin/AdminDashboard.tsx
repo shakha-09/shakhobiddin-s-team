@@ -14,7 +14,9 @@ import {
   Plus, 
   ArrowRight,
   Eye,
-  Calendar
+  Calendar,
+  UserCheck,
+  Video
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { formatUZS } from '../../utils/formatters';
@@ -24,7 +26,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
-  const { listings, bookings, reviews, updateBookingStatus } = useStore();
+  const { listings, bookings, reviews, updateBookingStatus, vendors } = useStore();
 
   const weddingHallsCount = listings.filter(l => l.category === 'wedding-hall').length;
   const carsCount = listings.filter(l => l.category === 'car').length;
@@ -32,21 +34,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   const famousStarsCount = listings.filter(l => l.category === 'famous-artist').length;
   const hostsCount = listings.filter(l => l.category === 'host').length;
   const entertainersCount = listings.filter(l => l.category === 'entertainer').length;
+  const videographersCount = listings.filter(l => l.category === 'videographer').length;
 
   const newRequestsCount = bookings.filter(b => b.status === 'new').length;
   const confirmedRequestsCount = bookings.filter(b => b.status === 'confirmed').length;
+  const pendingVendorsCount = vendors.filter(v => v.status === 'kutilmoqda').length;
 
   const totalListingViews = listings.reduce((sum, item) => sum + (item.viewsCount || 0), 0);
 
   const stats = [
+    { label: 'Yangi Vendorlar', count: pendingVendorsCount, icon: UserCheck, color: 'text-amber-600 bg-amber-50', path: '/admin/vendors' },
     { label: 'To\'yxonalar', count: weddingHallsCount, icon: Building2, color: 'text-rose-600 bg-rose-50', path: '/admin/wedding-halls' },
     { label: 'ZAGS Mashinalari', count: carsCount, icon: Car, color: 'text-blue-600 bg-blue-50', path: '/admin/cars' },
     { label: 'Xonandalar', count: artistsCount, icon: Music, color: 'text-emerald-600 bg-emerald-50', path: '/admin/artists' },
     { label: 'Yulduzlar (VIP)', count: famousStarsCount, icon: Sparkles, color: 'text-amber-600 bg-amber-50', path: '/admin/famous-artists' },
+    { label: 'Videochilar', count: videographersCount, icon: Video, color: 'text-cyan-600 bg-cyan-50', path: '/admin/videographers' },
     { label: 'Boshlovchilar', count: hostsCount, icon: Mic, color: 'text-purple-600 bg-purple-50', path: '/admin/hosts' },
     { label: 'Qiziqchilar', count: entertainersCount, icon: Smile, color: 'text-indigo-600 bg-indigo-50', path: '/admin/entertainers' },
     { label: 'Yangi So\'rovlar', count: newRequestsCount, icon: Inbox, color: 'text-rose-600 bg-rose-100', path: '/admin/bookings' },
-    { label: 'Tasdiqlanganlar', count: confirmedRequestsCount, icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-100', path: '/admin/bookings' },
   ];
 
   return (
@@ -62,21 +67,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
             Xush kelibsiz, Bosh Administrator!
           </h1>
           <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-xl">
-            Platformadagi barcha to'yxonalar, narxlar, fotosuratlar va mijozlar so'rovlarini bir joydan boshqaring.
+            Platformadagi barcha to'yxonalar, narxlar, fotosuratlar va yangi vendor arizalarini bir joydan boshqaring.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <button
+            onClick={() => onNavigate('/admin/vendors')}
+            className="flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-2.5 text-xs font-bold text-gray-950 transition-colors shadow-md cursor-pointer"
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>Vendor Arizalari ({pendingVendorsCount})</span>
+          </button>
+          <button
             onClick={() => onNavigate('/admin/wedding-halls?action=add')}
-            className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-700 transition-colors shadow-md"
+            className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-700 transition-colors shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Yangi To'yxona qo'shish</span>
           </button>
           <button
             onClick={() => onNavigate('/admin/bookings')}
-            className="flex items-center gap-2 rounded-xl bg-gray-800 border border-gray-700 px-4 py-2.5 text-xs font-bold text-gray-200 hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-gray-800 border border-gray-700 px-4 py-2.5 text-xs font-bold text-gray-200 hover:bg-gray-700 transition-colors cursor-pointer"
           >
             <Inbox className="w-4 h-4 text-rose-400" />
             <span>So'rovlarni ko'rish ({newRequestsCount})</span>

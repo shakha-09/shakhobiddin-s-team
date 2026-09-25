@@ -10,6 +10,11 @@ import { BudgetCalculatorPage } from './pages/BudgetCalculatorPage';
 import { MyWeddingPage } from './pages/MyWeddingPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 
+// Vendor Pages
+import { VendorRegisterPage } from './pages/vendor/VendorRegisterPage';
+import { VendorLoginPage } from './pages/vendor/VendorLoginPage';
+import { VendorDashboardPage } from './pages/vendor/VendorDashboardPage';
+
 // Admin Pages
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminLoginPage } from './pages/admin/AdminLoginPage';
@@ -19,6 +24,7 @@ import { AdminBookings } from './pages/admin/AdminBookings';
 import { AdminAvailability } from './pages/admin/AdminAvailability';
 import { AdminReviews } from './pages/admin/AdminReviews';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { AdminVendors } from './pages/admin/AdminVendors';
 
 function getInitialPath(): string {
   const hash = window.location.hash.replace(/^#/, '');
@@ -75,6 +81,8 @@ const AppContent: React.FC = () => {
       adminComponent = <AdminListings initialCategory="host" onNavigate={navigate} />;
     } else if (currentPath === '/admin/entertainers') {
       adminComponent = <AdminListings initialCategory="entertainer" onNavigate={navigate} />;
+    } else if (currentPath === '/admin/videographers' || currentPath === '/admin/videochilar') {
+      adminComponent = <AdminListings initialCategory="videographer" onNavigate={navigate} />;
     } else if (currentPath === '/admin/listings') {
       adminComponent = <AdminListings onNavigate={navigate} />;
     } else if (currentPath === '/admin/bookings') {
@@ -85,6 +93,8 @@ const AppContent: React.FC = () => {
       adminComponent = <AdminReviews />;
     } else if (currentPath === '/admin/settings') {
       adminComponent = <AdminSettings />;
+    } else if (currentPath === '/admin/vendors') {
+      adminComponent = <AdminVendors onNavigate={navigate} />;
     }
 
     return (
@@ -94,8 +104,25 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // Check for Listing Detail route: e.g. /wedding-halls/:id, /cars/:id, /artists/:id, /detail/:id
-  const detailMatch = currentPath.match(/^\/(?:wedding-halls|cars|artists|famous-artists|hosts|entertainers|detail)\/([^/]+)$/);
+  // Vendor & Auth Pages (Dedicated layouts)
+  if (currentPath === '/vendor-register') {
+    return <VendorRegisterPage onNavigate={navigate} />;
+  }
+
+  if (currentPath === '/vendor-login' || currentPath === '/kirish' || currentPath === '/login') {
+    return <VendorLoginPage onNavigate={navigate} />;
+  }
+
+  if (currentPath === '/admin-login') {
+    return <VendorLoginPage onNavigate={navigate} initialTab="admin" />;
+  }
+
+  if (currentPath === '/kabinet') {
+    return <VendorDashboardPage onNavigate={navigate} />;
+  }
+
+  // Check for Listing Detail route: e.g. /wedding-halls/:id, /cars/:id, /artists/:id, /videochilar/:id, /detail/:id
+  const detailMatch = currentPath.match(/^\/(?:wedding-halls|cars|artists|famous-artists|hosts|entertainers|videochilar|videographers|detail)\/([^/]+)$/);
   if (detailMatch && detailMatch[1]) {
     const listingId = detailMatch[1];
     return (
@@ -136,6 +163,10 @@ const AppContent: React.FC = () => {
       break;
     case '/entertainers':
       mainContent = <CategoryListingPage category="entertainer" onNavigate={navigate} />;
+      break;
+    case '/videochilar':
+    case '/videographers':
+      mainContent = <CategoryListingPage category="videographer" onNavigate={navigate} />;
       break;
     case '/budget-calculator':
       mainContent = <BudgetCalculatorPage onNavigate={navigate} />;

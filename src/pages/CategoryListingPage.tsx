@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Building2, 
   Car, 
@@ -14,7 +14,9 @@ import {
   CheckCircle2,
   Phone,
   LayoutGrid,
-  Map as MapIcon
+  Map as MapIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ListingCard } from '../components/common/ListingCard';
@@ -28,11 +30,13 @@ interface CategoryListingPageProps {
   onNavigate: (path: string) => void;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export const CategoryListingPage: React.FC<CategoryListingPageProps> = ({ 
   category, 
   onNavigate 
 }) => {
-  const { filterListings } = useStore();
+  const { filterListings, listings } = useStore();
   const catMeta = getCategoryMeta(category);
 
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -41,34 +45,55 @@ export const CategoryListingPage: React.FC<CategoryListingPageProps> = ({
   const [minGuests, setMinGuests] = useState<number | ''>('');
   const [sortBy, setSortBy] = useState<'recommended' | 'price_asc' | 'price_desc' | 'rating' | 'popular'>('recommended');
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset page when category or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category, selectedRegion, selectedDistrict, selectedDate, minGuests, sortBy]);
 
   const availableDistricts = selectedRegion ? getDistrictsByRegion(selectedRegion) : [];
 
-  const results = filterListings({
-    category,
-    region: selectedRegion || undefined,
-    district: selectedDistrict || undefined,
-    date: selectedDate,
-    minCapacity: minGuests ? Number(minGuests) : undefined,
-    sortBy
-  });
+  const results = useMemo(() => {
+    return filterListings({
+      category,
+      region: selectedRegion || undefined,
+      district: selectedDistrict || undefined,
+      date: selectedDate,
+      minCapacity: minGuests ? Number(minGuests) : undefined,
+      sortBy
+    });
+  }, [category, selectedRegion, selectedDistrict, selectedDate, minGuests, sortBy, listings]);
 
-  const mapMarkers = results.map(item => {
-    const coords = item.location?.coordinates && item.location.coordinates.lat && item.location.coordinates.lng
-      ? item.location.coordinates
-      : getCoordinatesForLocation(item.location?.region, item.location?.district);
+  const totalPages = Math.max(1, Math.ceil(results.length / ITEMS_PER_PAGE));
+  const displayedResults = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return results.slice(start, start + ITEMS_PER_PAGE);
+  }, [results, currentPage]);
 
-    return {
-      id: item.id,
-      title: item.title,
-      lat: coords.lat,
-      lng: coords.lng,
-      address: item.location?.address || `${item.location?.district}, ${item.location?.region}`,
-      coverImage: item.coverImage,
-      priceLabel: item.priceLabel,
-      onClick: () => onNavigate(`/detail/${item.id}`)
-    };
-  });
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 220, behavior: 'smooth' });
+  };
+
+  const mapMarkers = useMemo(() => {
+    return results.map(item => {
+      const coords = item.location?.coordinates && item.location.coordinates.lat && item.location.coordinates.lng
+        ? item.location.coordinates
+        : getCoordinatesForLocation(item.location?.region, item.location?.district);
+
+      return {
+        id: item.id,
+        title: item.title,
+        lat: coords.lat,
+        lng: coords.lng,
+        address: item.location?.address || `${item.location?.district || ''}, ${item.location?.region || ''}`,
+        coverImage: item.coverImage,
+        priceLabel: item.priceLabel,
+        onClick: () => onNavigate(`/detail/${item.id}`)
+      };
+    });
+  }, [results, onNavigate]);
 
   return (
     <div className="bg-slate-50 min-h-screen py-8 sm:py-12 text-gray-900">
@@ -206,12 +231,17 @@ export const CategoryListingPage: React.FC<CategoryListingPageProps> = ({
         </div>
 
         {/* Results Count & Status */}
-        <div className="mb-4 flex items-center justify-between text-xs text-gray-500">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
           <span>
             Jami: <strong className="text-gray-900">{results.length} ta taklif</strong>
+            {results.length > ITEMS_PER_PAGE && (
+              <span className="ml-2 text-gray-500">
+                (Ko'rsatilmoqda: {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, results.length)})
+              </span>
+            )}
           </span>
           {selectedDistrict && (
-            <span>Tuman: {selectedDistrict}</span>
+            <span>Tuman: <strong className="text-gray-900">{selectedDistrict}</strong></span>
           )}
         </div>
 
@@ -233,16 +263,63 @@ export const CategoryListingPage: React.FC<CategoryListingPageProps> = ({
               />
             </div>
           ) : (
-            /* Grid View */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {results.map((item) => (
-                <ListingCard
-                  key={item.id}
-                  listing={item}
-                  onNavigate={onNavigate}
-                  selectedDate={selectedDate || undefined}
-                />
-              ))}
+            /* Grid View with Pagination */
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedResults.map((item) => (
+                  <ListingCard
+                    key={item.id}
+                    listing={item}
+                    onNavigate={onNavigate}
+                    selectedDate={selectedDate || undefined}
+                  />
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="inline-flex items-center gap-1 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Oldingi</span>
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }).map((_, idx) => {
+                      const pageNum = idx + 1;
+                      return (
+                        <button
+                          key={pageNum}
+                          type="button"
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`h-9 w-9 rounded-xl text-xs font-bold transition-all ${
+                            currentPage === pageNum
+                              ? 'bg-rose-600 text-white shadow-md shadow-rose-200'
+                              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="inline-flex items-center gap-1 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs"
+                  >
+                    <span>Keyingi</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           )
         ) : (
@@ -252,7 +329,7 @@ export const CategoryListingPage: React.FC<CategoryListingPageProps> = ({
             </div>
             <h3 className="text-lg font-bold text-gray-900">Ushbu parametrlar bo'yicha takliflar topilmadi</h3>
             <p className="mt-1 text-xs sm:text-sm text-gray-500 max-w-sm mx-auto">
-              Iltimos, boshqa hududni tanlang yoki qidiruv filtrlari parametrlarini o'zgartiring.
+              Hozircha bu hududda yoki sanada mos xizmat topilmadi. Boshqa viloyat yoki sanani tanlab ko'ring.
             </p>
             <button
               onClick={() => {
@@ -261,7 +338,7 @@ export const CategoryListingPage: React.FC<CategoryListingPageProps> = ({
                 setSelectedDate('');
                 setMinGuests('');
               }}
-              className="mt-4 rounded-xl bg-rose-600 px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-rose-700 cursor-pointer"
+              className="mt-4 rounded-xl bg-rose-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-rose-700 cursor-pointer shadow-md shadow-rose-200"
             >
               Barcha hududlarni ko'rish
             </button>

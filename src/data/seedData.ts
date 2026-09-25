@@ -1,4 +1,4 @@
-import { ListingItem, BookingRequest, ReviewItem } from '../types';
+import { ListingItem, BookingRequest, ReviewItem, VendorAccount } from '../types';
 
 export const INITIAL_LISTINGS: ListingItem[] = [
   // 1. WEDDING HALLS
@@ -63,9 +63,50 @@ export const INITIAL_LISTINGS: ListingItem[] = [
       instagram: 'versal_grand_hall'
     },
     status: 'published',
+    vendorId: 'vendor-1',
     createdAt: '2026-01-15',
     updatedAt: '2026-09-18',
     viewsCount: 1420
+  },
+  {
+    id: 'hall-pending-1',
+    category: 'wedding-hall',
+    title: 'Shohona Saroy To\'yxonasi',
+    subtitle: 'Yunusoboddagi yangi 550 kishilik hashamatli to\'y maskani',
+    slug: 'shohona-saroy-toyxonasi',
+    featured: false,
+    isDemo: true,
+    isVerified: false,
+    rating: 5.0,
+    reviewCount: 0,
+    price: 24000000,
+    priceType: 'per_day',
+    priceLabel: '24 000 000 so\'m',
+    capacity: { min: 200, max: 550 },
+    location: {
+      region: 'Toshkent shahri',
+      district: 'Yunusobod',
+      address: 'Yunusobod tumani, Amir Temur shox ko\'chasi, 88-uy',
+      coordinates: { lat: 41.365, lng: 69.288 }
+    },
+    coverImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80'
+    ],
+    description: 'Yunusobod tumanidagi yangi 550 kishilik hashamatli to\'yxona. Yuqori sifatli xizmat, keng zal va zamonaviy yoritish uskunalari.',
+    amenities: ['550 kishilik zal', 'Konditsioner', 'LED Ekran', 'Avtoturargoh', 'Saxna'],
+    facilities: ['Konditsioner', 'LED Ekran', 'Avtoturargoh'],
+    availability: {},
+    contact: {
+      phone: '+998901112233',
+      telegram: 'shohonasaroy'
+    },
+    status: 'draft',
+    vendorId: 'vendor-pending-1',
+    createdAt: '2026-09-22',
+    updatedAt: '2026-09-22',
+    viewsCount: 15
   },
   {
     id: 'hall-2',
@@ -779,6 +820,174 @@ export const INITIAL_LISTINGS: ListingItem[] = [
     createdAt: '2026-02-18',
     updatedAt: '2026-09-15',
     viewsCount: 1620
+  },
+
+  // 7. VIDEOGRAPHERS (VIDEOCHILAR)
+  {
+    id: 'video-1',
+    category: 'videographer',
+    title: 'Nur Studio Video Production',
+    subtitle: '4K Cinema, Multikam va Dron tasvirga olish studiyasi',
+    slug: 'nur-studio-video',
+    featured: true,
+    isVerified: true,
+    rating: 4.9,
+    reviewCount: 46,
+    price: 6000000,
+    priceType: 'per_event',
+    priceLabel: '6 000 000 so\'mdan / to\'liq to\'y kuni',
+    location: {
+      region: 'Toshkent shahri',
+      district: 'Yunusobod',
+      address: 'Yunusobod tumani, Amir Temur shox ko\'chasi, 108-uy',
+      coordinates: { lat: 41.365, lng: 69.292 }
+    },
+    coverImage: 'https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1533158307587-828f0a76ef46?auto=format&fit=crop&w=1200&q=80'
+    ],
+    description: 'Nur Studio — to\'y va tantanalarni eng yuqori professional kinostandartlar darajasida tasvirga tushirishga ixtisoslashgan media jamoa. 4K Cinema kameralari (Sony FX3, FX6), DJI Ronin stabilizatorlari hamda zamonaviy dronlar yordamida to\'yingizning har bir baxtli daqiqasi san\'at asariga aylanadi. Tayyor material 10 kun ichida to\'liq montaj qilingan holda brendli USB fleshkada taqdim etiladi.',
+    amenities: [
+      '2 ta professional operator (Multikam)',
+      '4K 60fps Cinema kameralar (Sony FX seriyasi)',
+      'DJI Mavic 3 Pro orqali aerotasvir (dron)',
+      'DJI RS3 Pro stabilizatorlar',
+      'Love Story videorolik tayyorlash',
+      'Reels va Instagram uchun tezkor treyler (3 kunda)',
+      'Yuqori sifatli audio yozuv (DJ miksherdan to\'g\'ridan-to\'g\'ri)',
+      'Eksklyuziv sovg\'abop yog\'och fleshka'
+    ],
+    facilities: ['4K Video', 'Dron aerotasvir', 'Multikam', 'Love Story', 'Tezkor treyler', 'Professional audio'],
+    availability: {
+      '2026-09-22': 'available',
+      '2026-09-23': 'booked',
+      '2026-09-24': 'available',
+      '2026-09-25': 'available',
+      '2026-09-26': 'booked',
+      '2026-09-27': 'booked',
+      '2026-09-28': 'available',
+      '2026-10-02': 'available',
+      '2026-10-03': 'booked'
+    },
+    contact: {
+      phone: '+998 90 999 11 22',
+      telegram: 'nur_studio_uz',
+      instagram: 'nurstudio.uz'
+    },
+    status: 'published',
+    isDemo: true,
+    createdAt: '2026-03-01',
+    updatedAt: '2026-09-21',
+    viewsCount: 1890
+  },
+  {
+    id: 'video-2',
+    category: 'videographer',
+    title: 'Golden Frame Films',
+    subtitle: 'Premium darajadagi to\'y videofilmlari va eksklyuziv montaj',
+    slug: 'golden-frame-films',
+    featured: true,
+    isVerified: true,
+    rating: 5.0,
+    reviewCount: 39,
+    price: 9500000,
+    priceType: 'per_event',
+    priceLabel: '9 500 000 so\'mdan / VIP to\'y paketi',
+    location: {
+      region: 'Toshkent shahri',
+      district: 'Mirzo Ulug\'bek',
+      address: 'Mirzo Ulug\'bek tumani, Mustaqillik shox ko\'chasi, 75-uy',
+      coordinates: { lat: 41.325, lng: 69.298 }
+    },
+    coverImage: 'https://images.unsplash.com/photo-1533158307587-828f0a76ef46?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1533158307587-828f0a76ef46?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1579632652768-6cb9dcf85912?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80'
+    ],
+    description: 'Golden Frame Films — O\'zbekistondagi eng nufuzli to\'ylar va VIP marosimlar uchun kinoformatdagi videolarni suratga oluvchi studiya. 3 kishilik guruh, kinolensalar, Hollywood uslubidagi rang berish (Color Grading) va maxsus sound-design to\'yingizni kino zalida ko\'riladigan film darajasiga ko\'taradi.',
+    amenities: [
+      '3 kishilik professional kinoguruh',
+      'RED & Sony Cinema Line kameralar',
+      'DJI Inspire 3 & Mavic 3 Pro professional dronlar',
+      'To\'y zalida jonli efir (LED ekranga to\'g\'ridan-to\'g\'ri uzatish)',
+      'Hollywood uslubidagi professional rang berish (Color Grading)',
+      'Premyera treyleri to\'ydan 48 soat o\'tib tayyor bo\'ladi',
+      'Barcha xom ashyolar (RAW) va to\'liq film 2 ta metall fleshkada'
+    ],
+    facilities: ['Kino kameralar', 'Jonli efir (LED)', 'Dron 4K HDR', 'Hollywood Color', 'Ekspress treyler', '3 operator'],
+    availability: {
+      '2026-09-22': 'available',
+      '2026-09-24': 'booked',
+      '2026-09-25': 'booked',
+      '2026-09-26': 'booked',
+      '2026-09-27': 'available',
+      '2026-09-28': 'available',
+      '2026-10-04': 'available'
+    },
+    contact: {
+      phone: '+998 97 700 88 99',
+      telegram: 'goldenframe_uz',
+      instagram: 'goldenframefilms'
+    },
+    status: 'published',
+    isDemo: true,
+    createdAt: '2026-02-10',
+    updatedAt: '2026-09-20',
+    viewsCount: 2450
+  },
+  {
+    id: 'video-3',
+    category: 'videographer',
+    title: 'Zilola Media Production',
+    subtitle: 'Nafis LoveStory va samimiy oilaviy to\'y videolari',
+    slug: 'zilola-media-production',
+    featured: false,
+    isVerified: true,
+    rating: 4.8,
+    reviewCount: 31,
+    price: 4500000,
+    priceType: 'per_event',
+    priceLabel: '4 500 000 so\'mdan / kun',
+    location: {
+      region: 'Samarqand viloyati',
+      district: 'Samarqand shahri',
+      address: 'Samarqand shahri, Registon ko\'chasi, 14-uy',
+      coordinates: { lat: 39.654, lng: 66.975 }
+    },
+    coverImage: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80'
+    ],
+    description: 'Samarqand va butun voha bo\'ylab to\'y tantanalarini nafis, samimiy va zamonaviy usulda yoritib beramiz. Kelin salom marosimidan boshlab kechki tantana yakunigacha barcha muhim onlarni diqqat bilan muhrlaymiz.',
+    amenities: [
+      'Sony Alpha 4K kameralar',
+      'Dron orqali qadimiy Samarqand manzarasida LoveStory',
+      'Sinfdoshlar va do\'stlar tabriklari alohida rolikda',
+      'Tezkor montaj (7 kun ichida)',
+      'Kelin salom marosimini alohida yoritish'
+    ],
+    facilities: ['4K Video', 'Dron', 'LoveStory', 'Samarqand bo\'ylab', 'Tezkor montaj'],
+    availability: {
+      '2026-09-22': 'available',
+      '2026-09-25': 'available',
+      '2026-09-26': 'available',
+      '2026-09-27': 'booked',
+      '2026-09-28': 'available'
+    },
+    contact: {
+      phone: '+998 93 300 22 11',
+      telegram: 'zilola_media_uz'
+    },
+    status: 'published',
+    isDemo: true,
+    createdAt: '2026-04-12',
+    updatedAt: '2026-09-18',
+    viewsCount: 1420
   }
 ];
 
@@ -866,3 +1075,35 @@ export const INITIAL_REVIEWS: ReviewItem[] = [
     approved: true
   }
 ];
+
+export const INITIAL_VENDORS: VendorAccount[] = [
+  {
+    id: 'vendor-1',
+    phone: '+998712004545',
+    passwordHash: 'dG95bWFrb25pX3NhbHRfZGVtbzEyMzQ=', // demo1234
+    businessName: 'Versal Grand Hall',
+    category: 'wedding-hall',
+    region: 'Toshkent shahri',
+    district: 'Chilonzor',
+    description: 'Versal Grand Hall — Toshkentning Chilonzor tumanida joylashgan eng zamonaviy va hashamatli to\'yxona.',
+    status: 'tasdiqlangan',
+    listingId: 'hall-1',
+    createdAt: '2026-08-15',
+    updatedAt: '2026-09-20'
+  },
+  {
+    id: 'vendor-pending-1',
+    phone: '+998901112233',
+    passwordHash: 'dG95bWFrb25pX3NhbHRfZGVtbzEyMzQ=', // demo1234
+    businessName: 'Shohona Saroy To\'yxonasi',
+    category: 'wedding-hall',
+    region: 'Toshkent shahri',
+    district: 'Yunusobod',
+    description: 'Yunusobod tumanidagi yangi 550 kishilik hashamatli to\'yxona. Yuqori sifatli xizmat, keng zal va zamonaviy yoritish uskunalari.',
+    status: 'kutilmoqda',
+    listingId: 'hall-pending-1',
+    createdAt: '2026-09-22',
+    updatedAt: '2026-09-22'
+  }
+];
+

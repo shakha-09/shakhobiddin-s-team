@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
   Filter, 
@@ -9,7 +9,9 @@ import {
   RotateCcw, 
   Sparkles,
   SlidersHorizontal,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { UZBEKISTAN_REGIONS, getDistrictsByRegion } from '../data/locations';
@@ -20,8 +22,10 @@ interface SearchPageProps {
   onNavigate: (path: string) => void;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
-  const { filterListings } = useStore();
+  const { filterListings, listings } = useStore();
 
   // Read initial query params from URL hash / location
   const parseParams = () => {
@@ -37,7 +41,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
 
   const [query, setQuery] = useState(initialParams.get('q') || '');
   const [category, setCategory] = useState<CategoryType | 'all'>((initialParams.get('category') as any) || 'all');
-  const [region, setRegion] = useState(initialParams.get('region') || 'Toshkent shahri');
+  const [region, setRegion] = useState(initialParams.get('region') || '');
   const [district, setDistrict] = useState(initialParams.get('district') || '');
   const [date, setDate] = useState(initialParams.get('date') || '');
   const [minGuests, setMinGuests] = useState<number | ''>(
@@ -48,9 +52,30 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<'recommended' | 'nearest' | 'price_asc' | 'price_desc' | 'rating' | 'popular'>('recommended');
   
+  const [currentPage, setCurrentPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  const availableDistricts = getDistrictsByRegion(region);
+  // Sync state if hash/params change
+  useEffect(() => {
+    const handleHashChange = () => {
+      const p = parseParams();
+      if (p.get('q') !== null) setQuery(p.get('q') || '');
+      if (p.get('category')) setCategory(p.get('category') as any);
+      if (p.get('region') !== null) setRegion(p.get('region') || '');
+      if (p.get('district') !== null) setDistrict(p.get('district') || '');
+      if (p.get('date') !== null) setDate(p.get('date') || '');
+      if (p.get('guests')) setMinGuests(Number(p.get('guests')));
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Reset page when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, category, region, district, date, minGuests, maxPrice, minRating, onlyAvailable, sortBy]);
+
+  const availableDistricts = region ? getDistrictsByRegion(region) : [];
 
   const handleRegionChange = (newReg: string) => {
     setRegion(newReg);
@@ -60,7 +85,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
   const handleResetFilters = () => {
     setQuery('');
     setCategory('all');
-    setRegion('Toshkent shahri');
+    setRegion('');
     setDistrict('');
     setDate('');
     setMinGuests('');
@@ -70,18 +95,31 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
     setSortBy('recommended');
   };
 
-  const results = filterListings({
-    query,
-    category,
-    region,
-    district,
-    date,
-    minCapacity: minGuests ? Number(minGuests) : undefined,
-    maxPrice: maxPrice ? Number(maxPrice) : undefined,
-    minRating: minRating ? Number(minRating) : undefined,
-    onlyAvailable,
-    sortBy
-  });
+  const results = useMemo(() => {
+    return filterListings({
+      query,
+      category,
+      region: region || undefined,
+      district: district || undefined,
+      date,
+      minCapacity: minGuests ? Number(minGuests) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      minRating: minRating ? Number(minRating) : undefined,
+      onlyAvailable,
+      sortBy
+    });
+  }, [query, category, region, district, date, minGuests, maxPrice, minRating, onlyAvailable, sortBy, listings]);
+
+  const totalPages = Math.max(1, Math.ceil(results.length / ITEMS_PER_PAGE));
+  const displayedResults = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return results.slice(start, start + ITEMS_PER_PAGE);
+  }, [results, currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 120, behavior: 'smooth' });
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">
@@ -183,6 +221,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
                 <option value="car">ZAGS Mashinalari</option>
                 <option value="artist">Xonandalar</option>
                 <option value="famous-artist">Mashhur Yulduzlar (VIP)</option>
+                <option value="videographer">Videochilar & Media</option>
                 <option value="host">Boshlovchilar</option>
                 <option value="entertainer">Qiziqchilar va Shou</option>
               </select>
@@ -198,6 +237,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
                 onChange={(e) => handleRegionChange(e.target.value)}
                 className="w-full rounded-xl border border-gray-300 bg-gray-50 py-2 px-2.5 text-xs text-gray-800 focus:bg-white focus:border-rose-500 focus:outline-hidden"
               >
+                <option value="">Barcha viloyatlar (Butun O'zbekiston)</option>
                 {UZBEKISTAN_REGIONS.map((r) => (
                   <option key={r.id} value={r.name}>{r.name}</option>
                 ))}
@@ -301,15 +341,62 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
 
             {/* Listing Cards Grid */}
             {results.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {results.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                    onNavigate={onNavigate}
-                    selectedDate={date || undefined}
-                  />
-                ))}
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {displayedResults.map((listing) => (
+                    <ListingCard
+                      key={listing.id}
+                      listing={listing}
+                      onNavigate={onNavigate}
+                      selectedDate={date || undefined}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-6 border-t border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="inline-flex items-center gap-1 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Oldingi</span>
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }).map((_, idx) => {
+                        const pageNum = idx + 1;
+                        return (
+                          <button
+                            key={pageNum}
+                            type="button"
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`h-9 w-9 rounded-xl text-xs font-bold transition-all ${
+                              currentPage === pageNum
+                                ? 'bg-rose-600 text-white shadow-md shadow-rose-200'
+                                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="inline-flex items-center gap-1 rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs"
+                    >
+                      <span>Keyingi</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               /* Empty State (Rule 31) */
@@ -376,6 +463,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
                 <option value="car">ZAGS Mashinalari</option>
                 <option value="artist">Xonandalar</option>
                 <option value="famous-artist">Mashhur Yulduzlar</option>
+                <option value="videographer">Videochilar & Media</option>
                 <option value="host">Boshlovchilar</option>
                 <option value="entertainer">Qiziqchilar</option>
               </select>
@@ -388,6 +476,7 @@ export const SearchPage: React.FC<SearchPageProps> = ({ onNavigate }) => {
                 onChange={(e) => handleRegionChange(e.target.value)}
                 className="w-full rounded-xl border border-gray-300 p-2 text-xs"
               >
+                <option value="">Barcha viloyatlar (Butun O'zbekiston)</option>
                 {UZBEKISTAN_REGIONS.map((r) => (
                   <option key={r.id} value={r.name}>{r.name}</option>
                 ))}
